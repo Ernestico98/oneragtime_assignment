@@ -5,6 +5,7 @@ from .models import User, Investment, Bill
 from .serializers import UserSerializer, InvestmentSerializer, BillSerializer
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
+from rest_framework.parsers import JSONParser
 # Create your views here.
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -35,12 +36,13 @@ def bills_per_user(request, pk):
 
 @api_view(['PUT', 'DELETE'])
 def edit_investment(request, pk):
-    investment = get_object_or_404(investment, pk=pk)
+    investment = get_object_or_404(Investment, pk=pk)
     if request.method == 'PUT':
-        serializer = InvestmentSerializer(investment, data=request.data)
+        data = JSONParser().parse(request)
+        serializer = InvestmentSerializer(investment, data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, )
+            return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
     elif request.method == 'DELETE':
         investment.delete()
